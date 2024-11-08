@@ -74,16 +74,16 @@
             <div class="title">Resolution Distribution</div>
         </div>
         <div class="controls">
-            <div class="control-group">
-                <button class="button active" onclick="changeSplit('train')">Training</button>
-                <button class="button" onclick="changeSplit('val')">Validation</button>
-                <button class="button" onclick="changeSplit('test')">Test</button>
+            <div class="control-group" id="splitButtons">
+                <button class="button active" data-split="train">Training</button>
+                <button class="button" data-split="val">Validation</button>
+                <button class="button" data-split="test">Test</button>
             </div>
-            <div class="control-group">
-                <button class="button active" onclick="changeClass('Corrosion')">Corrosion</button>
-                <button class="button" onclick="changeClass('Deposits')">Deposits</button>
-                <button class="button" onclick="changeClass('Joint Separation')">Joint Separation</button>
-                <button class="button" onclick="changeClass('Normal Frames')">Normal Frames</button>
+            <div class="control-group" id="classButtons">
+                <button class="button active" data-class="Corrosion">Corrosion</button>
+                <button class="button" data-class="Deposits">Deposits</button>
+                <button class="button" data-class="Joint Separation">Joint Separation</button>
+                <button class="button" data-class="Normal Frames">Normal Frames</button>
             </div>
         </div>
         <div class="chart-container">
@@ -161,12 +161,28 @@
         let currentClass = 'Corrosion';
         let chart = null;
 
-        function updateButtons(type, value) {
-            const group = document.querySelector(`.control-group:${type === 'split' ? 'first' : 'last'}-child`);
-            group.querySelectorAll('.button').forEach(button => {
-                button.classList.toggle('active', button.textContent.includes(value));
-            });
-        }
+        // Add click handlers to all buttons
+        document.getElementById('splitButtons').addEventListener('click', (e) => {
+            if (e.target.dataset.split) {
+                currentSplit = e.target.dataset.split;
+                // Update split buttons
+                document.querySelectorAll('[data-split]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.split === currentSplit);
+                });
+                updateChart();
+            }
+        });
+
+        document.getElementById('classButtons').addEventListener('click', (e) => {
+            if (e.target.dataset.class) {
+                currentClass = e.target.dataset.class;
+                // Update class buttons
+                document.querySelectorAll('[data-class]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.class === currentClass);
+                });
+                updateChart();
+            }
+        });
 
         function updateChart() {
             const ctx = document.getElementById('resolutionChart');
@@ -240,18 +256,6 @@
             const summaryText = `Total images: ${total} | ` + 
                 resolutions.map((res, i) => `${res}: ${counts[i]} (${percentages[i]}%)`).join(' | ');
             document.getElementById('summary').textContent = summaryText;
-        }
-
-        function changeSplit(split) {
-            currentSplit = split;
-            updateButtons('split', split);
-            updateChart();
-        }
-
-        function changeClass(className) {
-            currentClass = className;
-            updateButtons('class', className);
-            updateChart();
         }
 
         // Initial render
